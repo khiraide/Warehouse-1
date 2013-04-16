@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
 
@@ -25,40 +26,23 @@ public class Warehouse extends Model{
   //@Required
   @OneToOne(cascade=CascadeType.ALL)
   private Address address;
-  @Required
+  @Transient
   private String addressId;
   
   public Warehouse(String warehouseId, String name, String addressId){
     this.warehouseId = warehouseId;
     this.name = name;
     this.addressId = addressId;
-    List<Address> addresses = Address.find().where().eq("addressId", addressId).findList();
-    if (!addresses.isEmpty()) {
-      this.address = addresses.get(0);
-    }
-    else {
-      this.address = null;
-    }
+    this.address = Address.find().where().eq("addressId", addressId).findUnique();
   }
   
   /**
    * Needs an existing address for creation.
    * @return null if ok, error string if not ok.
    */
-  public String validate(){
-    String output = null;
-    /**
-    if (!Address.find().findList().contains(address)) {
-      output = "Address doesn't exist";
-    }
-    *@depreciated
-    */
-    
-    if (Address.find().where().eq("addressId", this.addressId).findList().isEmpty()) {
-      output = "Address doesn't exist";
-    }
-    
-    return output;
+  public String validate() {
+    Address address = Address.find().where().eq("addressId", addressId).findUnique();
+    return (address == null) ? "Error: Address with ID " + addressId + " does not exist." : null;
   }
   
   public static Finder<Long, Warehouse> find(){
