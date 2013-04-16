@@ -2,6 +2,7 @@
 package controllers;
 
 import java.util.List;
+import models.Address;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -24,10 +25,12 @@ public class Warehouse extends Controller{
     Form<models.Warehouse> warehouseForm = form(models.Warehouse.class).bindFromRequest();
     //validate
     if (warehouseForm.hasErrors()) {
-      return badRequest("ware house requires id, name and an address." + warehouseForm.errors().toString());
+      return badRequest("Warehouse error:" + warehouseForm.errors().toString());
     }
-    //passed validation, ok
+    //passed validation, now can create warehouse entity 
     models.Warehouse warehouse = warehouseForm.get();
+    Address address = Address.find().where().eq("addressId", warehouse.getAddressId()).findUnique();
+    warehouse.setAddress(address);
     warehouse.save();
     return ok(warehouse.toString());
   }

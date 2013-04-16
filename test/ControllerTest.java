@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.NOT_FOUND;
@@ -172,6 +173,11 @@ public class ControllerTest {
     result = callAction(controllers.routes.ref.Warehouse.newWarehouse(), request);
     //assertEquals("Created new warehouse" + contentAsString(result), 000, status(result));
     assertEquals("Created new warehouse" + contentAsString(result), OK, status(result));
+    
+    // Make sure our newly created warehouse has an Address entity.
+    Warehouse warehouse02 = Warehouse.find().where().eq("warehouseId", "Warehouse-02").findUnique();
+    assertNotNull("Warehouse 02 has an address", warehouse02.getAddress());
+    
     
     //Test POST /warehouse with invalid address
     request = fakeRequest();
